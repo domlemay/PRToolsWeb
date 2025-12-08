@@ -3,6 +3,17 @@
 
 - **Projet**: Backend du projet PRtools (TypeScript + Express + Prisma)
 
+**But de l'application**
+
+- Cette application back-end permet la création et la modification de rapports d'intervention (rapports PR).
+- Elle fournit des endpoints pour créer un rapport, lier des intervenants existants (PR) au rapport, et gérer les sections d'un rapport.
+
+**Restrictions importantes**
+
+- L'application N'EST PAS destinée à gérer les intervenants (PR) — elle ne permet pas la création d'un intervenant via les endpoints de rapport.
+- Les opérations de suppression (rapport, patient, user, etc.) ne sont pas exposées par défaut via l'API publique et doivent être effectuées uniquement via des outils d'administration sécurisés si nécessaire.
+- Pour ajouter ou modifier des comptes PR (utilisateurs), utilisez l'interface d'administration prévue (`/auth/register` pour l'enregistrement initial par exemple) ou des outils d'administration spécifiques. Les endpoints relatifs aux rapports n'autorisent que la sélection d'intervenants existants et actifs.
+
 **Prérequis**:
 
 - Node.js (>=18 recommandé)
@@ -188,6 +199,68 @@ curl -H "Authorization: Bearer <TOKEN>" http://localhost:3000/api/auth/profile
 ```bash
 curl -H "Authorization: Bearer <TOKEN>" http://localhost:3000/auth/profile
 ```
+
+---
+
+**Exemples API (rapports & patients)**
+
+- Récupérer la liste des PR actifs (sélection seulement) :
+
+```bash
+curl -H "Authorization: Bearer <TOKEN>" http://localhost:3000/rapports/prs
+```
+
+- Créer un rapport (sélectionner seulement des PR existants et actifs) :
+
+```bash
+curl -X POST http://localhost:3000/rapports \
+	-H "Authorization: Bearer <TOKEN>" \
+	-H "Content-Type: application/json" \
+	-d '{
+		"patient_id": 123,
+		"code_smpau": "SMP-001",
+		"numero_formulaire_terrain": "FT-42",
+		"no_autor": "A-987",
+		"intervenants": [{ "id": 5, "role": "PR_1" }, { "id": 7, "role": "PR_2" }]
+	}'
+```
+
+- Créer un patient (endpoint distinct) :
+
+```bash
+curl -X POST http://localhost:3000/patients \
+	-H "Authorization: Bearer <TOKEN>" \
+	-H "Content-Type: application/json" \
+	-d '{ "nom": "Martin", "prenom": "Alice", "annee_naissance": 1985, "sexe": "F" }'
+```
+
+Notes importantes :
+
+- Les endpoints de création de rapport vérifient que les intervenants listés existent et ont `actif = true`. Si des intervenants sont manquants ou inactifs, la requête échoue avec statut 400 et une liste des identifiants problématiques.
+- La création d'un patient se fait via `POST /patients`. L'API de rapport n'autorise pas la création d'intervenants (PR) — cela doit se faire via les endpoints d'auth/administration.
+
+**Initialisation / seed (utilisateurs par défaut)**
+
+Un utilisateur admin par défaut est fourni par un script de seed Prisma :
+
+- Email: `adminPRTools`
+- Mot de passe: `admin` (stocké haché avec bcrypt, rounds=10)
+- id: `1` (si la ligne est créée lors du seed)
+
+Pour exécuter le seed localement ou sur votre instance Neon, définissez `DATABASE_URL` vers la base cible et exécutez depuis le dossier `backend` :
+
+```bash
+# installer ts-node si nécessaire
+npm install -D ts-node
+
+# générer le client prisma si non généré
+npx prisma generate
+
+# exécuter le seed (insère/upsert l'utilisateur admin)
+npm run seed
+```
+
+Remarque : si vous voulez que le seed soit exécuté automatiquement lors de `prisma migrate deploy`, vous pouvez utiliser `npx prisma db seed` (Prisma respectera la configuration `prisma.seed` dans `package.json`). Assurez-vous que `DATABASE_URL` pointe vers votre instance Neon cible.
 
 ---
 

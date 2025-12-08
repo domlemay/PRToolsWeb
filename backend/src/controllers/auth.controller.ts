@@ -8,8 +8,9 @@ dotenv.config();
 export const register = async (req: Request, res: Response) => {
     const { email, mot_de_passe, nom, prenom, numero_pr, niveau_pr, cellulaire } = req.body;
 
-    if (!email || !mot_de_passe) {
-        return res.status(400).json({ message: 'Email et mot_de_passe requis' });
+    // Validation stricte : Exiger les champs nécessaires côté client
+    if (!email || !mot_de_passe || !numero_pr || !niveau_pr) {
+        return res.status(400).json({ message: 'Champs requis: email, mot_de_passe, numero_pr et niveau_pr' });
     }
 
     const existing = await prisma.intervenant_pr.findUnique({ where: { email } });

@@ -14,12 +14,66 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-	"email": "resttest+1@example.com",
-	"mot_de_passe": "TestPass123!",
-	"nom": "Rest",
-	"prenom": "Tester"
+	"email": "adminPRTools",
+	"numero_pr": "ADMIN001",
+	"niveau_pr": "Admin",
+	"mot_de_passe": "admin",
+	"nom": "Admin",
+	"prenom": "Default",
+	"actif": true,
+	"admin": true
 }
 
+### Cree un nouveau rapport. (pas encore pret a etre tester)
+POST http://localhost:3000/rapports
+Content-Type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+	"patient_id": 1,
+	"numero_formulaire_terrain": "FORM001",
+	"code_smpau": "SMPAU001",
+	"no_autor": "AUTOR001",
+	"etat_rapport": "brouillon"
+}
+
+### Cree un rapport COMPLET (sections multiples) — utiliser POST /rapports/full
+POST http://localhost:3000/rapports/full
+Content-Type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+	"patient": {
+		"nom": "Dupont",
+		"prenom": "Jean",
+		"annee_naissance": 1980,
+		"sexe": "M",
+		"no_ass": "ASS123",
+		"maladie": "aucune"
+	},
+	"numero_formulaire_terrain": "FORM-FULL-001",
+	"code_smpau": "SMPAU-FULL-001",
+	"no_autor": "AUTOR-FULL-001",
+	"intervenants": [{ "id": 1, "role": "PR_1" }],
+	"s01": { "date_prise_en_charge": "2025-12-08T08:30:00Z" },
+	"s02": { "service_pr": "Urgence", "no_evenement_pr": "EVT123" },
+	"s03": { "heure_arrivee_usager": "2025-12-08T08:45:00Z" },
+	"s04": { "etat_conscience": "reactif", "voies_respiratoires": "libres", "respiration": "adequate", "pouls_presence": true, "pouls_localisation": "radial", "niveau_conscience": "A", "oriente": true },
+	"s05": {
+		"natures": [ { "code": "NAT001", "libelle": "Traumatisme" } ],
+		"info": { "nature_cas_autre": "aucune" }
+	},
+	"s06": { "antecedents": [ { "code": "ANT001", "libelle": "Diabete" } ] },
+	"s07": { "info": { "a_maladies_inf": false }, "rapports": [] },
+	"s08": { "info": { "a_allergies": false }, "rapports": [] },
+	"s09": { "info": { "ceinture": "oui", "incarcere": "non", "incarcere_duree_min": 0 }, "rapports": [] },
+	"s10": { "info": { "sans_particularite": "oui" }, "constats": [] },
+	"s11": { "sur_les_lieux": "oui", "a_distance": "non", "no_permis": "PERM123" },
+	"s12": [ { "heure_prise": "2025-12-08T09:00:00Z", "respiration_min": 18, "pouls_min": 72, "etat_conscience_avpu": "A", "glycemie": 5.6, "spo2_pct": 98, "o2_pct": 21 } ],
+	"s13": { "info": { "non_intervention": "non", "commentaire": "rien" }, "medicaments": { "nitro_prise": "non" } },
+	"s14": { "entreprise_ambulanciere_nom": "AmbuCo", "entreprise_ambulanciere_no": "AMB001", "pr_accompagnant": false },
+	"s15": { "texte": "Observation complète via test" }
+}
 
 ### Login (get JWT)
 POST http://localhost:3000/auth/login
