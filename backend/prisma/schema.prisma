@@ -1,0 +1,480 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+model patient {
+  id               Int      @id @default(autoincrement())
+  nom              String?  // VARCHAR(100)
+  prenom           String?  // VARCHAR(100)
+  annee_naissance  Int?     // SMALLINT
+  sexe             String?  // CHAR(1)
+  no_ass           String?  // VARCHAR(20)
+  maladie          String?  // TEXT
+
+  // Relations
+  r_rapport_pr     r_rapport_pr[]
+}
+model intervenant_pr {
+  id            Int      @id @default(autoincrement())
+  nom           String   // NOT NULL
+  prenom        String   // NOT NULL
+  email         String   @unique // NOT NULL, utilisé pour login
+  numero_pr     String   // NOT NULL
+  mot_de_passe  String   // NOT NULL (hash)
+  niveau_pr     String   // NOT NULL
+  date_active   DateTime // DATE NOT NULL
+  date_inactive DateTime?
+  actif         Boolean? @default(true)
+  cellulaire    String?
+
+  // Relations
+  r_rapport_pr_intervenant r_rapport_pr_intervenant[]
+}
+model r_rapport_pr {
+  id                        Int      @id @default(autoincrement())
+  patient_id                Int
+
+  numero_formulaire_terrain String?  // VARCHAR(20)
+  code_smpau                String   // VARCHAR(20) NOT NULL
+  no_autor                  String?  // VARCHAR(20)
+
+  etat_rapport              String?  // brouillon, soumis...
+  created_at                DateTime?
+  updated_at                DateTime?
+
+  // Relation vers patient
+  patient                   patient  @relation(fields: [patient_id], references: [id])
+
+  // Relations vers intervenants (N:N via table de liaison)
+  r_rapport_pr_intervenant  r_rapport_pr_intervenant[]
+
+  // Relations vers sections (1–15)
+  s01_prise_en_charge       s01_prise_en_charge?
+  s02_service_pr            s02_service_pr?
+  s03_arrivee_usager        s03_arrivee_usager?
+  s04_approche_initiale     s04_approche_initiale?
+  s05_rapport_nature_cas    s05_rapport_nature_cas[]
+  s05_nature_cas_info       s05_nature_cas_info?
+  s06_rapport_antecedent    s06_rapport_antecedent[]
+  s07_maladies_infectieuses_info s07_maladies_infectieuses_info?
+  s07_rapport_maladie_infectieuse s07_rapport_maladie_infectieuse[]
+  s08_allergies_info        s08_allergies_info?
+  s08_rapport_allergie      s08_rapport_allergie[]
+  s09_rapport_mecanisme_trauma s09_rapport_mecanisme_trauma[]
+  s09_mecanisme_trauma_info s09_mecanisme_trauma_info?
+  s10_trauma_info           s10_trauma_info?
+  s10_trauma_constat        s10_trauma_constat[]
+  s11_support_clinique_info s11_support_clinique_info?
+  s12_signe_vital           s12_signe_vital[]
+  s13_info                  s13_info?
+  s13_arret_cardiaque       s13_arret_cardiaque?
+  s13_voies_aeriennes       s13_voies_aeriennes?
+  s13_hemorragies           s13_hemorragies?
+  s13_immobilisations       s13_immobilisations?
+  s13_accouchement          s13_accouchement?
+  s13_medicaments           s13_medicaments?
+  s14_entreprise_ambulanciere s14_entreprise_ambulanciere?
+  s15_autres_renseignements s15_autres_renseignements?
+}
+model r_rapport_pr_intervenant {
+  id             Int  @id @default(autoincrement())
+  rapport_id     Int
+  intervenant_id Int
+  role           String? // ex: PR_1, PR_2...
+
+  // Relations
+  rapport        r_rapport_pr    @relation(fields: [rapport_id], references: [id])
+  intervenant    intervenant_pr  @relation(fields: [intervenant_id], references: [id])
+
+  @@unique([rapport_id, intervenant_id])
+}
+model s01_prise_en_charge {
+  id                   Int      @id @default(autoincrement())
+  rapport_id           Int
+  date_prise_en_charge DateTime // DATE
+
+  rapport              r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+model s02_service_pr {
+  id              Int      @id @default(autoincrement())
+  rapport_id      Int
+  service_pr      String   // NOT NULL
+  no_evenement_pr String?  // VARCHAR(10)
+
+  rapport         r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+model s03_arrivee_usager {
+  id                   Int      @id @default(autoincrement())
+  rapport_id           Int
+  heure_arrivee_usager DateTime? // TIME
+
+  rapport              r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+model s04_approche_initiale {
+  id                  Int      @id @default(autoincrement())
+  rapport_id          Int
+
+  etat_conscience     String?  // 'reactif' / 'non_reactif'
+  voies_respiratoires String?  // 'libres' / 'obstruees'
+  respiration         String?  // 'adequate' / 'inadequate'
+  pouls_presence      Boolean?
+  pouls_localisation  String?  // 'carotidien' / 'radial'
+  niveau_conscience   String?  // AVPU
+  oriente             Boolean?
+
+
+  rapport             r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+model s05_nature_cas_type {
+  id      Int    @id @default(autoincrement())
+  code    String
+  libelle String
+  actif   Boolean? @default(true)
+
+  rapports s05_rapport_nature_cas[]
+}
+model s05_rapport_nature_cas {
+  id            Int  @id @default(autoincrement())
+  rapport_id    Int
+  nature_cas_id Int
+
+  rapport       r_rapport_pr       @relation(fields: [rapport_id], references: [id])
+  nature_cas    s05_nature_cas_type @relation(fields: [nature_cas_id], references: [id])
+}
+
+model s05_nature_cas_info {
+  id               Int      @id @default(autoincrement())
+  rapport_id       Int
+  nature_cas_autre String?  // TEXT
+  rapport          r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+model s06_antecedent_type {
+  id      Int    @id @default(autoincrement())
+  code    String
+  libelle String
+  actif   Boolean? @default(true)
+
+  rapports s06_rapport_antecedent[]
+}
+
+model s06_rapport_antecedent {
+  id            Int @id @default(autoincrement())
+  rapport_id    Int
+  antecedent_id Int
+
+  rapport       r_rapport_pr       @relation(fields: [rapport_id], references: [id])
+  antecedent    s06_antecedent_type @relation(fields: [antecedent_id], references: [id])
+}
+model s07_maladie_infectieuse_type {
+  id        Int    @id @default(autoincrement())
+  categorie String?
+  code      String
+  libelle   String
+  actif     Boolean? @default(true)
+
+  rapports  s07_rapport_maladie_infectieuse[]
+}
+
+model s07_maladies_infectieuses_info {
+  id             Int      @id @default(autoincrement())
+  rapport_id     Int
+  a_maladies_inf Boolean?
+  commentaire    String?
+
+  rapport        r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s07_rapport_maladie_infectieuse {
+  id                          Int      @id @default(autoincrement())
+  rapport_id                  Int
+  maladie_infectieuse_type_id Int?
+  libelle_autre               String?
+  details                     String?
+
+  rapport                     r_rapport_pr                @relation(fields: [rapport_id], references: [id])
+  maladie_type                s07_maladie_infectieuse_type? @relation(fields: [maladie_infectieuse_type_id], references: [id])
+}
+model s08_allergie_type {
+  id        Int    @id @default(autoincrement())
+  categorie String?
+  code      String
+  libelle   String
+  actif     Boolean? @default(true)
+
+  rapports  s08_rapport_allergie[]
+}
+
+model s08_allergies_info {
+  id          Int      @id @default(autoincrement())
+  rapport_id  Int
+  a_allergies Boolean?
+  commentaire String?
+
+  rapport     r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s08_rapport_allergie {
+  id               Int      @id @default(autoincrement())
+  rapport_id       Int
+  allergie_type_id Int?
+  libelle_autre    String?
+  details          String?
+
+  rapport          r_rapport_pr      @relation(fields: [rapport_id], references: [id])
+  allergie_type    s08_allergie_type? @relation(fields: [allergie_type_id], references: [id])
+}
+model s09_mecanisme_trauma_type {
+  id      Int    @id @default(autoincrement())
+  code    String
+  libelle String
+  actif   Boolean? @default(true)
+
+  rapports s09_rapport_mecanisme_trauma[]
+}
+
+model s09_rapport_mecanisme_trauma {
+  id                  Int @id @default(autoincrement())
+  rapport_id          Int
+  mecanisme_trauma_id Int
+
+  rapport             r_rapport_pr            @relation(fields: [rapport_id], references: [id])
+  mecanisme           s09_mecanisme_trauma_type @relation(fields: [mecanisme_trauma_id], references: [id])
+}
+
+model s09_mecanisme_trauma_info {
+  id                  Int      @id @default(autoincrement())
+  rapport_id          Int
+  ceinture            String?  // 'oui' / 'non' / 'inconnu'
+  ballon_deploye      String?
+  incarcere           String?
+  incarcere_duree_min Int?
+
+  rapport             r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+model s10_trauma_info {
+  id                 Int      @id @default(autoincrement())
+  rapport_id         Int
+  sans_particularite String?  // 'oui' / 'non' / NULL
+  commentaire        String?
+
+  rapport            r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s10_trauma_zone_type {
+  id      Int    @id @default(autoincrement())
+  code    String
+  libelle String
+  actif   Boolean? @default(true)
+
+  constats s10_trauma_constat[]
+}
+
+model s10_trauma_lesion_type {
+  id      Int    @id @default(autoincrement())
+  code    String
+  libelle String
+  actif   Boolean? @default(true)
+
+  constats s10_trauma_constat[]
+}
+
+model s10_trauma_constat {
+  id             Int      @id @default(autoincrement())
+  rapport_id     Int
+  zone_id        Int
+  lesion_type_id Int
+  commentaire    String?
+
+  rapport        r_rapport_pr         @relation(fields: [rapport_id], references: [id])
+  zone           s10_trauma_zone_type @relation(fields: [zone_id], references: [id])
+  lesion_type    s10_trauma_lesion_type @relation(fields: [lesion_type_id], references: [id])
+
+  @@unique([rapport_id, zone_id, lesion_type_id])
+}
+model s11_support_clinique_info {
+  id            Int      @id @default(autoincrement())
+  rapport_id    Int
+  sur_les_lieux String?
+  a_distance    String?
+  no_permis     String?
+  heure_support DateTime?
+
+  rapport       r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+model s12_signe_vital {
+  id                   Int      @id @default(autoincrement())
+  rapport_id           Int
+  heure_prise          DateTime
+  respiration_min      Int?
+  pouls_min            Int?
+  etat_conscience_avpu String?
+  glycemie             Float?
+  spo2_pct             Int?
+  o2_pct               Int?
+  created_at           DateTime?
+
+  rapport              r_rapport_pr @relation(fields: [rapport_id], references: [id])
+}
+model s13_info {
+  id               Int      @id @default(autoincrement())
+  rapport_id       Int
+  non_intervention String?
+  commentaire      String?
+
+  rapport          r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s13_arret_cardiaque {
+  id                       Int      @id @default(autoincrement())
+  rapport_id               Int
+  temoin_effondrement      String?
+  temoin_effondrement_type String?
+  temoin_effondrement_heure DateTime?
+  rcr_temoin               String?
+  dea_temoin               String?
+  dea_temoin_nb_chocs      Int?
+  rcr_pr_debut_heure       DateTime?
+  dea_pr                   String?
+  dea_pr_nb_chocs          Int?
+  retour_pouls_avant_tap   String?
+
+  rapport                  r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s13_voies_aeriennes {
+  id                       Int     @id @default(autoincrement())
+  rapport_id               Int
+  voies_aeriennes_liberees String?
+  appareil_succion         String?
+  masque_poche             String?
+  canule                   String?
+  canule_type              String?
+  ballon_ventilatoire      String?
+
+  rapport                  r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s13_hemorragies {
+  id                    Int     @id @default(autoincrement())
+  rapport_id            Int
+  pansements            String?
+  controle_pression     String?
+  controle_pression_type String?
+  garrot                String?
+  garrot_heure          DateTime?
+
+  rapport               r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s13_immobilisations {
+  id                     Int     @id @default(autoincrement())
+  rapport_id             Int
+  collet_cervical        String?
+  collet_taille          String?
+  matelas_immobilisateur String?
+  planche_longue         String?
+  ked                    String?
+  attelle_fixation       String?
+
+  rapport                r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s13_accouchement {
+  id                Int      @id @default(autoincrement())
+  rapport_id        Int
+  accouchement      String?
+  accouchement_heure DateTime?
+  acces_refuse      String?
+
+  rapport           r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s13_medicaments {
+  id                          Int      @id @default(autoincrement())
+  rapport_id                  Int
+
+  nitro_prise                 String?
+  nitro_heure_dose1           DateTime?
+  nitro_heure_dose2           DateTime?
+  epinephrine_03_prise        String?
+  epinephrine_03_heure_dose1  DateTime?
+  epinephrine_03_heure_dose2  DateTime?
+  epinephrine_015_prise       String?
+  epinephrine_015_heure_dose1 DateTime?
+  epinephrine_015_heure_dose2 DateTime?
+  glucose_prise               String?
+  glucose_heure_dose1         DateTime?
+  glucose_heure_dose2         DateTime?
+  glucagon_prise              String?
+  glucagon_heure              DateTime?
+  naloxone_prise              String?
+  naloxone_heure_dose1        DateTime?
+  naloxone_heure_dose2        DateTime?
+
+  rapport                     r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+model s14_entreprise_ambulanciere {
+  id                          Int      @id @default(autoincrement())
+  rapport_id                  Int
+  entreprise_ambulanciere_nom String?
+  entreprise_ambulanciere_no  String?
+  pr_accompagnant             Boolean?
+
+  rapport                     r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}
+
+model s15_autres_renseignements {
+  id         Int      @id @default(autoincrement())
+  rapport_id Int
+  texte      String?
+
+  rapport    r_rapport_pr @relation(fields: [rapport_id], references: [id])
+
+  @@unique([rapport_id])
+}

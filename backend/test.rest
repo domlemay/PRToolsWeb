@@ -1,0 +1,64 @@
+
+# Backend REST tests for VS Code REST Client (or similar)
+# Usage:
+# 1) Démarrez le serveur : `cd backend && npm run dev`
+# 2) (Optionnel) Créez un user test admin : `npm run seed:test` (ou `ts-node src/scripts/create-test-user.ts`)
+# 3) Lancez chaque requête ci-dessous dans l'éditeur REST Client. Copiez le token retourné par `/auth/login`
+#    et remplacez `{{TOKEN}}` dans les requêtes suivantes.
+
+@TOKEN = <PASTE_YOUR_JWT_HERE>
+
+
+### Register (create a new intervenant)
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+	"email": "resttest+1@example.com",
+	"mot_de_passe": "TestPass123!",
+	"nom": "Rest",
+	"prenom": "Tester"
+}
+
+
+### Login (get JWT)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+	"email": "resttest+1@example.com",
+	"mot_de_passe": "TestPass123!"
+}
+
+# -> Copy the `token` value from the response and use it in subsequent requests as `{{TOKEN}}`
+
+
+### Profile (requires Authorization header)
+GET http://localhost:3000/auth/profile
+Authorization: Bearer {{TOKEN}}
+
+
+### Admin: list intervenants (requires admin token)
+GET http://localhost:3000/admin/intervenants
+Authorization: Bearer {{TOKEN}}
+
+
+### Admin: get single intervenant (replace :id)
+GET http://localhost:3000/admin/intervenants/1
+Authorization: Bearer {{TOKEN}}
+
+
+### Admin: change password for intervenant (replace :id)
+POST http://localhost:3000/admin/intervenants/1/change-password
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+	"new_password": "NewSecret123!"
+}
+
+
+### Admin: delete intervenant (replace :id)
+DELETE http://localhost:3000/admin/intervenants/1
+Authorization: Bearer {{TOKEN}}
+
