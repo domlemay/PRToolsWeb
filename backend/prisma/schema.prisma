@@ -35,6 +35,7 @@ model intervenant_pr {
   date_active   DateTime // DATE NOT NULL
   date_inactive DateTime?
   actif         Boolean? @default(true)
+  admin         Boolean? @default(false)
   cellulaire    String?
 
   // Relations
