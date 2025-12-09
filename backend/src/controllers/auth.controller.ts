@@ -11,9 +11,9 @@ dotenv.config();
 export const register = async (req: Request, res: Response) => {
     const { email, mot_de_passe, nom, prenom, numero_pr, niveau_pr, cellulaire } = req.body;
 
-    // Validation stricte : Exiger les champs nécessaires côté client
-    if (!email || !mot_de_passe || !numero_pr || !niveau_pr) {
-        return res.status(400).json({ message: 'Champs requis: email, mot_de_passe, numero_pr et niveau_pr' });
+    // Validation minimale : les champs obligatoires pour créer un intervenant
+    if (!email || !numero_pr || !niveau_pr) {
+        return res.status(400).json({ message: 'Champs requis: email, numero_pr et niveau_pr' });
     }
 
     const existing = await prisma.intervenant_pr.findUnique({ where: { email } });
@@ -21,21 +21,30 @@ export const register = async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Un intervenant existe déjà avec cet email' });
     }
 
-    const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
+    // Si un mot de passe est fourni, on le hache et on active l'utilisateur.
+    // Sinon, on crée un intervenant non actif et non admin (mot_de_passe NULL).
+    let data: any = {
+        email,
+        nom,
+        prenom,
+        numero_pr,
+        niveau_pr,
+        cellulaire,
+        admin: false,
+    };
 
-    const newIntervenant = await prisma.intervenant_pr.create({
-        data: {
-            email,
-            mot_de_passe: hashedPassword,
-            nom,
-            prenom,
-            numero_pr,
-            niveau_pr,
-            cellulaire,
-            date_active: new Date(),
-            actif: true,
-        },
-    });
+    if (mot_de_passe && typeof mot_de_passe === 'string' && mot_de_passe.length > 0) {
+        const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
+        data.mot_de_passe = hashedPassword;
+        data.actif = true;
+        data.date_active = new Date();
+    } else {
+        // pas de mot de passe fourni => utilisateur non actif et non admin
+        data.mot_de_passe = null;
+        data.actif = false;
+    }
+
+    const newIntervenant = await prisma.intervenant_pr.create({ data });
 
     return res.status(201).json({
         success: true,
@@ -46,13 +55,17 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) =>{
     const { email, mot_de_passe } = req.body;
-
     if (!email || !mot_de_passe) return res.status(400).json({ message: 'Email et mot_de_passe requis' });
 
     const intervenant = await prisma.intervenant_pr.findUnique({ where: { email } });
     if (!intervenant) return res.status(400).json({ message: 'Intervenant non trouvé' });
 
-    const valid = await bcrypt.compare(mot_de_passe, intervenant.mot_de_passe || '');
+    // Vérifier que l'utilisateur possède un mot de passe
+    if (!intervenant.mot_de_passe) {
+        return res.status(400).json({ message: 'Compte sans mot de passe : connexion impossible' });
+    }
+
+    const valid = await bcrypt.compare(mot_de_passe, intervenant.mot_de_passe);
     if (!valid) return res.status(400).json({ message: 'Mot de passe incorrect' });
         const jti = randomUUID();
         const expiresIn = process.env.JWT_EXPIRES || '2h';

@@ -42,7 +42,8 @@ export const changePassword = async (req: Request, res: Response) => {
   const hashed = await bcrypt.hash(new_password, 10);
 
   try {
-    await prisma.intervenant_pr.update({ where: { id }, data: { mot_de_passe: hashed } });
+    // Lorsque le mot de passe est défini via l'admin, on active également le compte
+    await prisma.intervenant_pr.update({ where: { id }, data: { mot_de_passe: hashed, actif: true, date_active: new Date() } });
     return res.json({ success: true, message: 'Mot de passe mis à jour' });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Erreur lors de la mise à jour', error: String(err) });

@@ -20,11 +20,10 @@ Content-Type: application/json
 	"email": "admin",
 	"numero_pr": "ADMIN001",
 	"niveau_pr": "Admin",
-	"mot_de_passe": "admin",
 	"nom": "Admin",
 	"prenom": "Admin",
-	"actif": true,
-	"admin": true
+	"actif": false,
+	"admin": false
 }
 
 ### Cree un nouveau rapport. (pas encore pret a etre tester)

@@ -30,12 +30,12 @@ model intervenant_pr {
   prenom        String   // NOT NULL
   email         String   @unique // NOT NULL, utilisé pour login
   numero_pr     String?  // now optional
-  mot_de_passe  String   // NOT NULL (hash)
+  mot_de_passe  String?  // optionnel (hash)
   niveau_pr     String   // NOT NULL
-  date_active   DateTime // DATE NOT NULL
+  date_active   DateTime? // DATE (optionnel — défini lorsque l'utilisateur est activé)
   date_inactive DateTime?
-  actif         Boolean? @default(true)
-  admin         Boolean? @default(false)
+  actif         Boolean  @default(false)
+  admin         Boolean  @default(false)
   cellulaire    String?
 
   // Relations
