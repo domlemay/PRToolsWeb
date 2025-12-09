@@ -10,16 +10,19 @@
 
 
 ### Register (create a new intervenant)
+### Cette commande est active a des fin de test de developpement seulement.
+### Ne sera pas disponible en production. comme le fait de modifier des utilisateurs.
+### Le tout est prevu dans l'app de bureau "PRToolsAdmin".
 POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-	"email": "adminPRTools",
+	"email": "admin",
 	"numero_pr": "ADMIN001",
 	"niveau_pr": "Admin",
 	"mot_de_passe": "admin",
 	"nom": "Admin",
-	"prenom": "Default",
+	"prenom": "Admin",
 	"actif": true,
 	"admin": true
 }

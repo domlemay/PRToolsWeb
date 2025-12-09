@@ -93,6 +93,7 @@ export declare const Intervenant_prScalarFieldEnum: {
     readonly date_active: "date_active";
     readonly date_inactive: "date_inactive";
     readonly actif: "actif";
+    readonly admin: "admin";
     readonly cellulaire: "cellulaire";
 };
 export type Intervenant_prScalarFieldEnum = (typeof Intervenant_prScalarFieldEnum)[keyof typeof Intervenant_prScalarFieldEnum];

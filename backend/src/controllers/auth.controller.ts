@@ -3,8 +3,11 @@ import prisma from '../prisma/prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { randomUUID } from 'crypto';
+import { addToBlacklist } from '../utils/tokenBlacklist';
 
 dotenv.config();
+
 export const register = async (req: Request, res: Response) => {
     const { email, mot_de_passe, nom, prenom, numero_pr, niveau_pr, cellulaire } = req.body;
 
@@ -51,17 +54,53 @@ export const login = async (req: Request, res: Response) =>{
 
     const valid = await bcrypt.compare(mot_de_passe, intervenant.mot_de_passe || '');
     if (!valid) return res.status(400).json({ message: 'Mot de passe incorrect' });
+        const jti = randomUUID();
+        const expiresIn = process.env.JWT_EXPIRES || '2h';
+        const algorithm = (process.env.JWT_ALGORITHMS || 'HS256') as jwt.Algorithm;
 
-    const token = jwt.sign(
-        { sub: intervenant.id, email: intervenant.email, niveau: intervenant.niveau_pr },
-        process.env.JWT_SECRET as string,
-        { expiresIn: '2h' }
-    )
-
+        const token = jwt.sign(
+                { sub: intervenant.id, email: intervenant.email, niveau: intervenant.niveau_pr, jti },
+                process.env.JWT_SECRET as jwt.Secret,
+                ({
+                    expiresIn,
+                    issuer: process.env.JWT_ISSUER,
+                    audience: process.env.JWT_AUDIENCE,
+                    algorithm,
+                } as jwt.SignOptions)
+        );
     return res.status(200).json({
         success: true,
         message: 'Connexion réussie',
         token,
         user: { id: intervenant.id, email: intervenant.email, nom: intervenant.nom, prenom: intervenant.prenom }
     })
+}
+
+export const logout = async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(400).json({ message: 'Authorization manquante' });
+
+    const token = authHeader.split(' ')[1];
+    if (!token) return res.status(400).json({ message: 'Token manquant' });
+
+        try {
+        const algorithm = (process.env.JWT_ALGORITHMS || 'HS256') as jwt.Algorithm;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as jwt.Secret, {
+            algorithms: [algorithm],
+            issuer: process.env.JWT_ISSUER,
+            audience: process.env.JWT_AUDIENCE,
+            ignoreExpiration: false,
+        } as jwt.VerifyOptions) as { jti?: string; exp?: number };
+
+        if (!decoded.jti || !decoded.exp) {
+            return res.status(400).json({ message: 'Token invalide pour révocation' });
+        }
+
+        // add to blacklist until token expiration
+        addToBlacklist(decoded.jti, decoded.exp);
+
+        return res.status(200).json({ success: true, message: 'Déconnecté, token révoqué' });
+    } catch (error) {
+        return res.status(400).json({ message: 'Token invalide ou déjà expiré' });
+    }
 }

@@ -31,242 +31,222 @@
 
 **Installation**
 
-```bash
+````bash
 # depuis le dossier backend
-npm install
-```
+# PRToolsWeb — Backend
 
-**Variables d'environnement**
-Placez vos variables dans `backend/.env`. Exemple minimal :
+Résumé professionnel et guide d'utilisation pour la partie backend du projet PRToolsWeb.
 
-```dotenv
-DATABASE_URL="postgresql://<user>:<password>@<host>/<db>?sslmode=require"
-```
+## **Présentation du projet**
 
-Veillez à garder cette valeur secrète.
+- **Nom du projet complet** : PRTools
+- **Module présent** : PRToolsWeb (backend)
 
-**Générer le client Prisma**
+PRTools est un outil de gestion destiné aux premiers répondants médicaux du Québec. Il facilite la création, la modification et la gestion des rapports d'intervention (rapports PR) et des dossiers patients associés.
+
+La partie `PRToolsWeb` correspond à l'application web utilisée par les intervenants PR pour remplir et modifier les rapports d'intervention. Dans ce dépôt, la couche backend (API REST) est fournie — le front-end sera ajouté ultérieurement.
+
+## **But de ce dépôt (backend)**
+
+- Fournir une API REST en TypeScript/Express pour :
+	- Authentifier les intervenants (PR) et gérer les sessions JWT.
+	- Créer, lire, mettre à jour et lier des rapports d'intervention aux intervenants.
+	- Gérer les patients associés aux rapports.
+	- Exposer des endpoints sécurisés pour la création et modification des sections d'un rapport.
+
+## **Architecture & Modèle MVC**
+
+Le backend suit une structure proche du pattern MVC :
+
+- **Models** : définis par Prisma dans `prisma/schema.prisma` et accessibles via le client généré `src/generated/prisma`.
+- **Controllers** : la logique métier et les handlers Express se trouvent dans `src/controllers/` (par ex. `auth.controller.ts`, `rapport.controller.ts`).
+- **Views** : côté API, il n'y a pas de vues HTML — les réponses sont JSON. L'équivalent 'view' est la forme des réponses JSON envoyées par les controllers.
+- **Routes** : définies dans `src/routes/` (par ex. `auth.routes.ts`, `rapport.routes.ts`) qui connectent les endpoints aux controllers.
+- **Middlewares** : gestion d'authentification, validation et autres dans `src/middlewares/`.
+
+Le fichier `MODELISATION.md` contient la modélisation ER (diagramme entité-relation) de la base de données. Consultez-le pour comprendre les relations entre `Rapport`, `Patient`, `Intervenant`, et les différentes sections du rapport.
+
+## **Prérequis**
+
+- Node.js >= 18 (recommandé)
+- npm (ou yarn)
+- Accès réseau à la base de données PostgreSQL (par exemple Neon)
+- `psql` (optionnel, utile pour diagnostique)
+
+Assurez-vous d'avoir configuré les variables d'environnement avant d'exécuter le serveur.
+
+## **Fichiers importants**
+
+- `prisma/schema.prisma` — schéma de la base de données (Prisma).
+- `prisma/` — migrations et fichiers liés à Prisma.
+- `prisma.config.ts` — configuration Prisma et chargement des `.env`.
+- `src/` — code source TypeScript :
+	- `src/index.ts` et `src/server.ts` — point d'entrée et configuration du serveur.
+	- `src/controllers/` — controllers des différents endpoints.
+	- `src/routes/` — définitions des routes Express.
+	- `src/middlewares/` — middlewares (authentification, erreurs, etc.).
+	- `src/generated/prisma` — client Prisma généré (ne pas modifier manuellement).
+- `MODELISATION.md` — diagramme ER / modélisation de la base de données.
+
+## **Installation (local)**
 
 ```bash
-# depuis backend
+# depuis le dossier `backend`
+npm install
+````
+
+## **Variables d'environnement**
+
+Créez un fichier `.env` à la racine de `backend/` (ne pas le committer) et ajoutez au minimum :
+
+```env
+DATABASE_URL="postgresql://<user>:<password>@<host>/<db>?sslmode=require"
+PORT=3000
+JWT_SECRET="votre-secret-jwt"
+# autres variables spécifiques (ex: SALT_ROUNDS, etc.)
+```
+
+Notes :
+
+- Ne partagez jamais `DATABASE_URL` publiquement.
+- Adaptez `PORT` et `JWT_SECRET` selon votre environnement.
+
+## **Prisma — Générer le client**
+
+Après installation, générez le client Prisma :
+
+```bash
 npx prisma generate
 ```
 
-**Créer / Synchroniser la base de données (Neon)**
-Choix rapide (sans historique de migration) :
+## **Prisma — Synchroniser et migrations**
+
+- Pour pousser le schéma sans créer d'historique de migration (rapide, pratique en prototypage) :
 
 ```bash
-# pousse le schéma Prisma vers la DB (crée les tables)
 npx prisma db push
 ```
 
-Création de migrations (recommandé en dev) :
+- Pour créer une migration (recommandé en développement) :
 
 ```bash
-# créer une migration et l'appliquer (interactive en local)
 npx prisma migrate dev --name init
 ```
 
-Déployer des migrations en production (CI) :
+- Pour déployer les migrations en production (CI) :
 
 ```bash
 npx prisma migrate deploy
 ```
 
-Réinitialiser la base (ATTENTION : supprime les données)
+- Pour réinitialiser la base en local (ATTENTION : supprime les données) :
 
 ```bash
-# local/dev seulement — demande confirmation
 npx prisma migrate reset
 ```
 
-Si vous préférez forcer tout (supprimer la DB et re-créer) :
+## **Neon (PostgreSQL managé)**
 
-1. Supprimez la base ou créez une nouvelle DB sur Neon
-2. Lancez `npx prisma db push` ou `npx prisma migrate deploy`
+- Neon est une option de base PostgreSQL managée souvent utilisée pour l'hébergement cloud.
+- Pour utiliser Neon :
 
-**Commandes Prisma utiles**
+  - Créez un projet Neon et obtenez la `DATABASE_URL`.
+  - Ajoutez-la dans `backend/.env`.
+  - Exécutez `npx prisma db push` ou `npx prisma migrate deploy` selon votre workflow.
 
-- Générer client : `npx prisma generate`
-- Lancer Studio (UI) : `npx prisma studio`
-- Voir SQL généré pour une migration : `npx prisma migrate dev --create-only --name <nom>`
-
-**Démarrer le serveur**
+- Vérifiez les tables via le dashboard Neon ou en utilisant `psql` :
 
 ```bash
-# mode développement (rechargement selon votre configuration)
-npm run dev
+# Exemple (macOS) :
+psql "postgresql://<user>:<password>@<host>/<db>?sslmode=require"
+\dt
+```
 
-# build + start
+## **Initialisation / seed**
+
+Un script de seed peut fournir un utilisateur admin par défaut. Exemple d'utilisateur souvent fourni pour le développement :
+
+- email: `adminPRTools`
+- mot de passe: `admin` (haché dans la DB)
+
+Pour exécuter le seed localement (si un script est défini dans `package.json`) :
+
+```bash
+npx prisma generate
+npm run seed
+```
+
+Ou via la commande Prisma seed configurée :
+
+```bash
+npx prisma db seed
+```
+
+## **Démarrer le serveur**
+
+- Mode développement (avec reload selon configuration) :
+
+```bash
+npm run dev
+```
+
+- Build + start :
+
+```bash
 npm run build
 npm start
 ```
 
-Scripts définis dans `package.json` (rappel) :
+Le serveur écoute par défaut sur le `PORT` défini dans `.env` (ex. `3000`). Les routes API sont généralement préfixées (par ex. `/api` ou racine selon `src/server.ts`).
 
-- `npm run dev` — développement
-- `npm run build` — compile TypeScript
-- `npm start` — démarre `dist/index.js`
-- `npm run prisma` — raccourci pour Prisma CLI
+## **Points d'accès API (exemples)**
 
-**Travailler avec Neon**
+- Authentification : `POST /auth/register`, `POST /auth/login`, `GET /auth/profile` (JWT)
+- Rapports : `GET /rapports`, `POST /rapports`, `GET /rapports/:id`, `PUT /rapports/:id`
+- Patients : `POST /patients`, `GET /patients/:id`
 
-- Ouvrez le dashboard Neon et sélectionnez votre projet → Database → Tables pour voir les tables.
-- Si vous ne voyez pas de tables : vous n'avez pas appliqué de migration ou `db push`.
-- Exemple `psql` (remplacez la connection string) :
+(Consultez `src/routes/` et `src/controllers/` pour la liste complète et les paramétrages.)
+
+## **Tests**
+	Cette section reste a faire. Actuellement non mise en place.
+- Emplacement probable des tests : si présents, dans un répertoire `tests/` ou `src/__tests__`.
+- Pour lancer les tests (si un script est défini dans `package.json`) :
 
 ```bash
-# installez libpq/psql si besoin (macOS Homebrew)
-brew install libpq
-brew link --force libpq
+npm test
+```
+ 
+- Si vous utilisez `jest` :
 
-# se connecter (remplacez par votre DATABASE_URL)
-psql "postgresql://<user>:<password>@<host>/<db>?sslmode=require"
-
-# lister les tables
-\dt
+```bash
+npm run test:watch
 ```
 
-**Réinitialisation / sauvegarde**
+- Si aucun test n'est présent, créez des tests unitaires pour les controllers et des tests d'intégration pour les endpoints en utilisant une base de données de test (ou une instance Neon isolée).
 
-- Avant d'exécuter `migrate reset` ou de récréer la DB, exportez vos données si nécessaire.
-- Neon propose des sauvegardes/points-in-time dans le dashboard selon le plan.
+## **Debug et erreurs courantes**
 
-**Debug / Erreurs fréquentes**
+- `Prisma schema validation P1012` : vérifier les contraintes `@@unique` pour les relations one-to-one.
+- Si `prisma/` ne contient pas de migrations : vous n'avez pas utilisé `prisma migrate dev`.
+- `npx prisma generate` ne crée pas les tables : utilisez `npx prisma db push` ou créez/appliquez des migrations.
 
-- `Prisma schema validation P1012` : souvent dû à des relations one-to-one sans contrainte unique. Vérifiez `@@unique([...])` sur les modèles côté définissant la relation.
-- Pas de `migrations` dans `prisma/` : vous n'avez pas créé de migrations avec `prisma migrate dev`.
-- `npx prisma generate` ne crée pas les tables — utilisez `db push` ou `migrate`.
+## **Bonnes pratiques**
 
-**Bonnes pratiques**
+- Ne commitez jamais votre `.env`.
+- Utilisez des migrations (`prisma migrate`) en développement pour conserver l'historique.
+- Utilisez `db push` uniquement pour prototypage rapide.
+- Testez les migrations dans un environnement identique à la production lorsque possible.
 
-- Utilisez `migrate` en développement pour garder un historique des changements.
-- Utilisez `db push` pour synchroniser rapidement pendant le prototypage.
-- Ne versionnez pas votre `.env` contenant `DATABASE_URL`.
+## **Aide / prochaines étapes**
 
-**Exemples rapides (copier-coller)**
-
-```bash
-# installer
-npm install
-
-# générer et pousser le schéma
-npx prisma generate
-npx prisma db push
-
-# démarrer en dev
-npm run dev
-```
-
-**Exemples API (auth)**
-
-Créer un intervenant (register) :
-
-```bash
-curl -X POST http://localhost:3000/api/auth/register \
-	-H "Content-Type: application/json" \
-	-d '{"email":"pr@example.com","mot_de_passe":"Secret123","nom":"Dupont","prenom":"Jean"}'
-```
-
-````
-```bash
-curl -X POST http://localhost:3000/auth/register \
-	-H "Content-Type: application/json" \
-	-d '{"email":"pr@example.com","mot_de_passe":"Secret123","nom":"Dupont","prenom":"Jean"}'
-````
-
-Se connecter (login) :
-
-```bash
-curl -X POST http://localhost:3000/api/auth/login \
-	-H "Content-Type: application/json" \
-	-d '{"email":"pr@example.com","mot_de_passe":"Secret123"}'
-```
-
-````
-```bash
-curl -X POST http://localhost:3000/auth/login \
-	-H "Content-Type: application/json" \
-	-d '{"email":"pr@example.com","mot_de_passe":"Secret123"}'
-````
-
-Récupérer le profile (avec token) :
-
-```bash
-curl -H "Authorization: Bearer <TOKEN>" http://localhost:3000/api/auth/profile
-```
-
-```bash
-curl -H "Authorization: Bearer <TOKEN>" http://localhost:3000/auth/profile
-```
+- Souhaitez-vous que je :
+  - Génère et pousse le schéma sur votre instance Neon (`npx prisma db push`)?
+  - Prépare une migration initiale (`npx prisma migrate dev --name init`)?
+  - Ajoute une section `How to contribute` ou `Architecture diagram` plus détaillée ?
 
 ---
 
-**Exemples API (rapports & patients)**
+Fichier modifié : `backend/README.md`
 
-- Récupérer la liste des PR actifs (sélection seulement) :
-
-```bash
-curl -H "Authorization: Bearer <TOKEN>" http://localhost:3000/rapports/prs
-```
-
-- Créer un rapport (sélectionner seulement des PR existants et actifs) :
-
-```bash
-curl -X POST http://localhost:3000/rapports \
-	-H "Authorization: Bearer <TOKEN>" \
-	-H "Content-Type: application/json" \
-	-d '{
-		"patient_id": 123,
-		"code_smpau": "SMP-001",
-		"numero_formulaire_terrain": "FT-42",
-		"no_autor": "A-987",
-		"intervenants": [{ "id": 5, "role": "PR_1" }, { "id": 7, "role": "PR_2" }]
-	}'
-```
-
-- Créer un patient (endpoint distinct) :
-
-```bash
-curl -X POST http://localhost:3000/patients \
-	-H "Authorization: Bearer <TOKEN>" \
-	-H "Content-Type: application/json" \
-	-d '{ "nom": "Martin", "prenom": "Alice", "annee_naissance": 1985, "sexe": "F" }'
-```
-
-Notes importantes :
-
-- Les endpoints de création de rapport vérifient que les intervenants listés existent et ont `actif = true`. Si des intervenants sont manquants ou inactifs, la requête échoue avec statut 400 et une liste des identifiants problématiques.
-- La création d'un patient se fait via `POST /patients`. L'API de rapport n'autorise pas la création d'intervenants (PR) — cela doit se faire via les endpoints d'auth/administration.
-
-**Initialisation / seed (utilisateurs par défaut)**
-
-Un utilisateur admin par défaut est fourni par un script de seed Prisma :
-
-- Email: `adminPRTools`
-- Mot de passe: `admin` (stocké haché avec bcrypt, rounds=10)
-- id: `1` (si la ligne est créée lors du seed)
-
+Si vous voulez que j'ajoute des exemples d'appels API supplémentaires ou que je génère un README anglais, dites-le-moi.
 Pour exécuter le seed localement ou sur votre instance Neon, définissez `DATABASE_URL` vers la base cible et exécutez depuis le dossier `backend` :
-
-```bash
-# installer ts-node si nécessaire
-npm install -D ts-node
-
-# générer le client prisma si non généré
-npx prisma generate
-
-# exécuter le seed (insère/upsert l'utilisateur admin)
-npm run seed
-```
-
-Remarque : si vous voulez que le seed soit exécuté automatiquement lors de `prisma migrate deploy`, vous pouvez utiliser `npx prisma db seed` (Prisma respectera la configuration `prisma.seed` dans `package.json`). Assurez-vous que `DATABASE_URL` pointe vers votre instance Neon cible.
-
----
-
-Si vous voulez, je peux :
-
-- exécuter `npx prisma db push` maintenant pour créer les tables sur Neon (je le ferai depuis le dossier `backend`),
-- ou préparer une migration initiale `npx prisma migrate dev --name init`.
-
-Si vous souhaitez que j'ajoute une section de seed (exécution automatique de données de test), dites-le-moi et je l'ajoute.

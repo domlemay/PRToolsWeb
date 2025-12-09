@@ -29,6 +29,7 @@ export type Intervenant_prMinAggregateOutputType = {
     date_active: Date | null;
     date_inactive: Date | null;
     actif: boolean | null;
+    admin: boolean | null;
     cellulaire: string | null;
 };
 export type Intervenant_prMaxAggregateOutputType = {
@@ -42,6 +43,7 @@ export type Intervenant_prMaxAggregateOutputType = {
     date_active: Date | null;
     date_inactive: Date | null;
     actif: boolean | null;
+    admin: boolean | null;
     cellulaire: string | null;
 };
 export type Intervenant_prCountAggregateOutputType = {
@@ -55,6 +57,7 @@ export type Intervenant_prCountAggregateOutputType = {
     date_active: number;
     date_inactive: number;
     actif: number;
+    admin: number;
     cellulaire: number;
     _all: number;
 };
@@ -75,6 +78,7 @@ export type Intervenant_prMinAggregateInputType = {
     date_active?: true;
     date_inactive?: true;
     actif?: true;
+    admin?: true;
     cellulaire?: true;
 };
 export type Intervenant_prMaxAggregateInputType = {
@@ -88,6 +92,7 @@ export type Intervenant_prMaxAggregateInputType = {
     date_active?: true;
     date_inactive?: true;
     actif?: true;
+    admin?: true;
     cellulaire?: true;
 };
 export type Intervenant_prCountAggregateInputType = {
@@ -101,6 +106,7 @@ export type Intervenant_prCountAggregateInputType = {
     date_active?: true;
     date_inactive?: true;
     actif?: true;
+    admin?: true;
     cellulaire?: true;
     _all?: true;
 };
@@ -185,12 +191,13 @@ export type Intervenant_prGroupByOutputType = {
     nom: string;
     prenom: string;
     email: string;
-    numero_pr: string;
+    numero_pr: string | null;
     mot_de_passe: string;
     niveau_pr: string;
     date_active: Date;
     date_inactive: Date | null;
     actif: boolean | null;
+    admin: boolean | null;
     cellulaire: string | null;
     _count: Intervenant_prCountAggregateOutputType | null;
     _avg: Intervenant_prAvgAggregateOutputType | null;
@@ -209,12 +216,13 @@ export type intervenant_prWhereInput = {
     nom?: Prisma.StringFilter<"intervenant_pr"> | string;
     prenom?: Prisma.StringFilter<"intervenant_pr"> | string;
     email?: Prisma.StringFilter<"intervenant_pr"> | string;
-    numero_pr?: Prisma.StringFilter<"intervenant_pr"> | string;
+    numero_pr?: Prisma.StringNullableFilter<"intervenant_pr"> | string | null;
     mot_de_passe?: Prisma.StringFilter<"intervenant_pr"> | string;
     niveau_pr?: Prisma.StringFilter<"intervenant_pr"> | string;
     date_active?: Prisma.DateTimeFilter<"intervenant_pr"> | Date | string;
     date_inactive?: Prisma.DateTimeNullableFilter<"intervenant_pr"> | Date | string | null;
     actif?: Prisma.BoolNullableFilter<"intervenant_pr"> | boolean | null;
+    admin?: Prisma.BoolNullableFilter<"intervenant_pr"> | boolean | null;
     cellulaire?: Prisma.StringNullableFilter<"intervenant_pr"> | string | null;
     r_rapport_pr_intervenant?: Prisma.R_rapport_pr_intervenantListRelationFilter;
 };
@@ -223,12 +231,13 @@ export type intervenant_prOrderByWithRelationInput = {
     nom?: Prisma.SortOrder;
     prenom?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
-    numero_pr?: Prisma.SortOrder;
+    numero_pr?: Prisma.SortOrderInput | Prisma.SortOrder;
     mot_de_passe?: Prisma.SortOrder;
     niveau_pr?: Prisma.SortOrder;
     date_active?: Prisma.SortOrder;
     date_inactive?: Prisma.SortOrderInput | Prisma.SortOrder;
     actif?: Prisma.SortOrderInput | Prisma.SortOrder;
+    admin?: Prisma.SortOrderInput | Prisma.SortOrder;
     cellulaire?: Prisma.SortOrderInput | Prisma.SortOrder;
     r_rapport_pr_intervenant?: Prisma.r_rapport_pr_intervenantOrderByRelationAggregateInput;
 };
@@ -240,12 +249,13 @@ export type intervenant_prWhereUniqueInput = Prisma.AtLeast<{
     NOT?: Prisma.intervenant_prWhereInput | Prisma.intervenant_prWhereInput[];
     nom?: Prisma.StringFilter<"intervenant_pr"> | string;
     prenom?: Prisma.StringFilter<"intervenant_pr"> | string;
-    numero_pr?: Prisma.StringFilter<"intervenant_pr"> | string;
+    numero_pr?: Prisma.StringNullableFilter<"intervenant_pr"> | string | null;
     mot_de_passe?: Prisma.StringFilter<"intervenant_pr"> | string;
     niveau_pr?: Prisma.StringFilter<"intervenant_pr"> | string;
     date_active?: Prisma.DateTimeFilter<"intervenant_pr"> | Date | string;
     date_inactive?: Prisma.DateTimeNullableFilter<"intervenant_pr"> | Date | string | null;
     actif?: Prisma.BoolNullableFilter<"intervenant_pr"> | boolean | null;
+    admin?: Prisma.BoolNullableFilter<"intervenant_pr"> | boolean | null;
     cellulaire?: Prisma.StringNullableFilter<"intervenant_pr"> | string | null;
     r_rapport_pr_intervenant?: Prisma.R_rapport_pr_intervenantListRelationFilter;
 }, "id" | "email">;
@@ -254,12 +264,13 @@ export type intervenant_prOrderByWithAggregationInput = {
     nom?: Prisma.SortOrder;
     prenom?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
-    numero_pr?: Prisma.SortOrder;
+    numero_pr?: Prisma.SortOrderInput | Prisma.SortOrder;
     mot_de_passe?: Prisma.SortOrder;
     niveau_pr?: Prisma.SortOrder;
     date_active?: Prisma.SortOrder;
     date_inactive?: Prisma.SortOrderInput | Prisma.SortOrder;
     actif?: Prisma.SortOrderInput | Prisma.SortOrder;
+    admin?: Prisma.SortOrderInput | Prisma.SortOrder;
     cellulaire?: Prisma.SortOrderInput | Prisma.SortOrder;
     _count?: Prisma.intervenant_prCountOrderByAggregateInput;
     _avg?: Prisma.intervenant_prAvgOrderByAggregateInput;
@@ -275,24 +286,26 @@ export type intervenant_prScalarWhereWithAggregatesInput = {
     nom?: Prisma.StringWithAggregatesFilter<"intervenant_pr"> | string;
     prenom?: Prisma.StringWithAggregatesFilter<"intervenant_pr"> | string;
     email?: Prisma.StringWithAggregatesFilter<"intervenant_pr"> | string;
-    numero_pr?: Prisma.StringWithAggregatesFilter<"intervenant_pr"> | string;
+    numero_pr?: Prisma.StringNullableWithAggregatesFilter<"intervenant_pr"> | string | null;
     mot_de_passe?: Prisma.StringWithAggregatesFilter<"intervenant_pr"> | string;
     niveau_pr?: Prisma.StringWithAggregatesFilter<"intervenant_pr"> | string;
     date_active?: Prisma.DateTimeWithAggregatesFilter<"intervenant_pr"> | Date | string;
     date_inactive?: Prisma.DateTimeNullableWithAggregatesFilter<"intervenant_pr"> | Date | string | null;
     actif?: Prisma.BoolNullableWithAggregatesFilter<"intervenant_pr"> | boolean | null;
+    admin?: Prisma.BoolNullableWithAggregatesFilter<"intervenant_pr"> | boolean | null;
     cellulaire?: Prisma.StringNullableWithAggregatesFilter<"intervenant_pr"> | string | null;
 };
 export type intervenant_prCreateInput = {
     nom: string;
     prenom: string;
     email: string;
-    numero_pr: string;
+    numero_pr?: string | null;
     mot_de_passe: string;
     niveau_pr: string;
     date_active: Date | string;
     date_inactive?: Date | string | null;
     actif?: boolean | null;
+    admin?: boolean | null;
     cellulaire?: string | null;
     r_rapport_pr_intervenant?: Prisma.r_rapport_pr_intervenantCreateNestedManyWithoutIntervenantInput;
 };
@@ -301,12 +314,13 @@ export type intervenant_prUncheckedCreateInput = {
     nom: string;
     prenom: string;
     email: string;
-    numero_pr: string;
+    numero_pr?: string | null;
     mot_de_passe: string;
     niveau_pr: string;
     date_active: Date | string;
     date_inactive?: Date | string | null;
     actif?: boolean | null;
+    admin?: boolean | null;
     cellulaire?: string | null;
     r_rapport_pr_intervenant?: Prisma.r_rapport_pr_intervenantUncheckedCreateNestedManyWithoutIntervenantInput;
 };
@@ -314,12 +328,13 @@ export type intervenant_prUpdateInput = {
     nom?: Prisma.StringFieldUpdateOperationsInput | string;
     prenom?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    numero_pr?: Prisma.StringFieldUpdateOperationsInput | string;
+    numero_pr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     mot_de_passe?: Prisma.StringFieldUpdateOperationsInput | string;
     niveau_pr?: Prisma.StringFieldUpdateOperationsInput | string;
     date_active?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     date_inactive?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     actif?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
+    admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
     cellulaire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     r_rapport_pr_intervenant?: Prisma.r_rapport_pr_intervenantUpdateManyWithoutIntervenantNestedInput;
 };
@@ -328,12 +343,13 @@ export type intervenant_prUncheckedUpdateInput = {
     nom?: Prisma.StringFieldUpdateOperationsInput | string;
     prenom?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    numero_pr?: Prisma.StringFieldUpdateOperationsInput | string;
+    numero_pr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     mot_de_passe?: Prisma.StringFieldUpdateOperationsInput | string;
     niveau_pr?: Prisma.StringFieldUpdateOperationsInput | string;
     date_active?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     date_inactive?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     actif?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
+    admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
     cellulaire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     r_rapport_pr_intervenant?: Prisma.r_rapport_pr_intervenantUncheckedUpdateManyWithoutIntervenantNestedInput;
 };
@@ -342,24 +358,26 @@ export type intervenant_prCreateManyInput = {
     nom: string;
     prenom: string;
     email: string;
-    numero_pr: string;
+    numero_pr?: string | null;
     mot_de_passe: string;
     niveau_pr: string;
     date_active: Date | string;
     date_inactive?: Date | string | null;
     actif?: boolean | null;
+    admin?: boolean | null;
     cellulaire?: string | null;
 };
 export type intervenant_prUpdateManyMutationInput = {
     nom?: Prisma.StringFieldUpdateOperationsInput | string;
     prenom?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    numero_pr?: Prisma.StringFieldUpdateOperationsInput | string;
+    numero_pr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     mot_de_passe?: Prisma.StringFieldUpdateOperationsInput | string;
     niveau_pr?: Prisma.StringFieldUpdateOperationsInput | string;
     date_active?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     date_inactive?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     actif?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
+    admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
     cellulaire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 export type intervenant_prUncheckedUpdateManyInput = {
@@ -367,12 +385,13 @@ export type intervenant_prUncheckedUpdateManyInput = {
     nom?: Prisma.StringFieldUpdateOperationsInput | string;
     prenom?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    numero_pr?: Prisma.StringFieldUpdateOperationsInput | string;
+    numero_pr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     mot_de_passe?: Prisma.StringFieldUpdateOperationsInput | string;
     niveau_pr?: Prisma.StringFieldUpdateOperationsInput | string;
     date_active?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     date_inactive?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     actif?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
+    admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
     cellulaire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 export type intervenant_prCountOrderByAggregateInput = {
@@ -386,6 +405,7 @@ export type intervenant_prCountOrderByAggregateInput = {
     date_active?: Prisma.SortOrder;
     date_inactive?: Prisma.SortOrder;
     actif?: Prisma.SortOrder;
+    admin?: Prisma.SortOrder;
     cellulaire?: Prisma.SortOrder;
 };
 export type intervenant_prAvgOrderByAggregateInput = {
@@ -402,6 +422,7 @@ export type intervenant_prMaxOrderByAggregateInput = {
     date_active?: Prisma.SortOrder;
     date_inactive?: Prisma.SortOrder;
     actif?: Prisma.SortOrder;
+    admin?: Prisma.SortOrder;
     cellulaire?: Prisma.SortOrder;
 };
 export type intervenant_prMinOrderByAggregateInput = {
@@ -415,6 +436,7 @@ export type intervenant_prMinOrderByAggregateInput = {
     date_active?: Prisma.SortOrder;
     date_inactive?: Prisma.SortOrder;
     actif?: Prisma.SortOrder;
+    admin?: Prisma.SortOrder;
     cellulaire?: Prisma.SortOrder;
 };
 export type intervenant_prSumOrderByAggregateInput = {
@@ -452,12 +474,13 @@ export type intervenant_prCreateWithoutR_rapport_pr_intervenantInput = {
     nom: string;
     prenom: string;
     email: string;
-    numero_pr: string;
+    numero_pr?: string | null;
     mot_de_passe: string;
     niveau_pr: string;
     date_active: Date | string;
     date_inactive?: Date | string | null;
     actif?: boolean | null;
+    admin?: boolean | null;
     cellulaire?: string | null;
 };
 export type intervenant_prUncheckedCreateWithoutR_rapport_pr_intervenantInput = {
@@ -465,12 +488,13 @@ export type intervenant_prUncheckedCreateWithoutR_rapport_pr_intervenantInput = 
     nom: string;
     prenom: string;
     email: string;
-    numero_pr: string;
+    numero_pr?: string | null;
     mot_de_passe: string;
     niveau_pr: string;
     date_active: Date | string;
     date_inactive?: Date | string | null;
     actif?: boolean | null;
+    admin?: boolean | null;
     cellulaire?: string | null;
 };
 export type intervenant_prCreateOrConnectWithoutR_rapport_pr_intervenantInput = {
@@ -490,12 +514,13 @@ export type intervenant_prUpdateWithoutR_rapport_pr_intervenantInput = {
     nom?: Prisma.StringFieldUpdateOperationsInput | string;
     prenom?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    numero_pr?: Prisma.StringFieldUpdateOperationsInput | string;
+    numero_pr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     mot_de_passe?: Prisma.StringFieldUpdateOperationsInput | string;
     niveau_pr?: Prisma.StringFieldUpdateOperationsInput | string;
     date_active?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     date_inactive?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     actif?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
+    admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
     cellulaire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 export type intervenant_prUncheckedUpdateWithoutR_rapport_pr_intervenantInput = {
@@ -503,12 +528,13 @@ export type intervenant_prUncheckedUpdateWithoutR_rapport_pr_intervenantInput = 
     nom?: Prisma.StringFieldUpdateOperationsInput | string;
     prenom?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    numero_pr?: Prisma.StringFieldUpdateOperationsInput | string;
+    numero_pr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     mot_de_passe?: Prisma.StringFieldUpdateOperationsInput | string;
     niveau_pr?: Prisma.StringFieldUpdateOperationsInput | string;
     date_active?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     date_inactive?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     actif?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
+    admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
     cellulaire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 /**
@@ -546,6 +572,7 @@ export type intervenant_prSelect<ExtArgs extends runtime.Types.Extensions.Intern
     date_active?: boolean;
     date_inactive?: boolean;
     actif?: boolean;
+    admin?: boolean;
     cellulaire?: boolean;
     r_rapport_pr_intervenant?: boolean | Prisma.intervenant_pr$r_rapport_pr_intervenantArgs<ExtArgs>;
     _count?: boolean | Prisma.Intervenant_prCountOutputTypeDefaultArgs<ExtArgs>;
@@ -561,6 +588,7 @@ export type intervenant_prSelectCreateManyAndReturn<ExtArgs extends runtime.Type
     date_active?: boolean;
     date_inactive?: boolean;
     actif?: boolean;
+    admin?: boolean;
     cellulaire?: boolean;
 }, ExtArgs["result"]["intervenant_pr"]>;
 export type intervenant_prSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -574,6 +602,7 @@ export type intervenant_prSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
     date_active?: boolean;
     date_inactive?: boolean;
     actif?: boolean;
+    admin?: boolean;
     cellulaire?: boolean;
 }, ExtArgs["result"]["intervenant_pr"]>;
 export type intervenant_prSelectScalar = {
@@ -587,9 +616,10 @@ export type intervenant_prSelectScalar = {
     date_active?: boolean;
     date_inactive?: boolean;
     actif?: boolean;
+    admin?: boolean;
     cellulaire?: boolean;
 };
-export type intervenant_prOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nom" | "prenom" | "email" | "numero_pr" | "mot_de_passe" | "niveau_pr" | "date_active" | "date_inactive" | "actif" | "cellulaire", ExtArgs["result"]["intervenant_pr"]>;
+export type intervenant_prOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nom" | "prenom" | "email" | "numero_pr" | "mot_de_passe" | "niveau_pr" | "date_active" | "date_inactive" | "actif" | "admin" | "cellulaire", ExtArgs["result"]["intervenant_pr"]>;
 export type intervenant_prInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     r_rapport_pr_intervenant?: boolean | Prisma.intervenant_pr$r_rapport_pr_intervenantArgs<ExtArgs>;
     _count?: boolean | Prisma.Intervenant_prCountOutputTypeDefaultArgs<ExtArgs>;
@@ -606,12 +636,13 @@ export type $intervenant_prPayload<ExtArgs extends runtime.Types.Extensions.Inte
         nom: string;
         prenom: string;
         email: string;
-        numero_pr: string;
+        numero_pr: string | null;
         mot_de_passe: string;
         niveau_pr: string;
         date_active: Date;
         date_inactive: Date | null;
         actif: boolean | null;
+        admin: boolean | null;
         cellulaire: string | null;
     }, ExtArgs["result"]["intervenant_pr"]>;
     composites: {};
@@ -978,6 +1009,7 @@ export interface intervenant_prFieldRefs {
     readonly date_active: Prisma.FieldRef<"intervenant_pr", 'DateTime'>;
     readonly date_inactive: Prisma.FieldRef<"intervenant_pr", 'DateTime'>;
     readonly actif: Prisma.FieldRef<"intervenant_pr", 'Boolean'>;
+    readonly admin: Prisma.FieldRef<"intervenant_pr", 'Boolean'>;
     readonly cellulaire: Prisma.FieldRef<"intervenant_pr", 'String'>;
 }
 /**

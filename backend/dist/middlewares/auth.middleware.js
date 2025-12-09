@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { isBlacklisted } from "../utils/tokenBlacklist";
 export const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader)
@@ -7,7 +8,15 @@ export const authenticate = (req, res, next) => {
     if (!token)
         return res.status(401).json({ error: "Token manquant" });
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const algorithm = (process.env.JWT_ALGORITHMS || "HS256");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+            algorithms: [algorithm],
+            issuer: process.env.JWT_ISSUER,
+            audience: process.env.JWT_AUDIENCE,
+        });
+        if (decoded.jti && isBlacklisted(decoded.jti)) {
+            return res.status(401).json({ error: "Token révoqué" });
+        }
         req.user = decoded; // Ajout sur req.user → défini dans express.d.ts
         return next();
     }

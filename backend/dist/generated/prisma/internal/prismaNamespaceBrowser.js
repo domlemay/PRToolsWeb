@@ -106,6 +106,7 @@ export const Intervenant_prScalarFieldEnum = {
     date_active: 'date_active',
     date_inactive: 'date_inactive',
     actif: 'actif',
+    admin: 'admin',
     cellulaire: 'cellulaire'
 };
 export const R_rapport_prScalarFieldEnum = {
