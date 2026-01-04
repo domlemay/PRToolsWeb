@@ -1,5 +1,5 @@
 
-# Backend REST tests for VS Code REST Client (or similar)
+# Backend REST tests pour les test des diver chemin de la base de donnees
 # Usage:
 # 1) Démarrez le serveur : `cd backend && npm run dev`
 # 2) (Optionnel) Créez un user test admin : `npm run seed:test` (ou `ts-node src/scripts/create-test-user.ts`)
